@@ -27,7 +27,7 @@ typedef union
 #define WriteMotors(m1, m2) \
   ({ \
     rawPacket sRawPacket_mds = { '#', '#', '#', 0, 0, 0 }; \
-    sRawPacket_mds.sMotorCommand.pMotorR_sds16 = m1; \
+    sRawPacket_mds.sMotorCommand.pMotorR_sds16 = (int16_t)(m1 * 0.9); \
     sRawPacket_mds.sMotorCommand.pMotorL_sds16 = -m2; \
     Serial1.write(sRawPacket_mds.data, BUFFER_LENGTH); \
   })
@@ -49,7 +49,7 @@ void setup() {
 }
 
 void loop() {
-  if (millis() - stateTimer < 150) {
+  if (millis() - stateTimer < 300) {
     WriteMotors(power, power);
   } else {
     WriteMotors(0, 0);

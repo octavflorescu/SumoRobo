@@ -2,13 +2,15 @@
 
 #include "Declarations.h"
 
+bool didAttackAtLeastOnce = false;
+
 void rotateSetup() {
   currentState = StateSearch;
   backTimer = 0;
 }
 
 void rotateExtraSetup() {
-    
+    backTimer = millis();
 }
 
 // to be called only if b & 0b00001000
@@ -110,6 +112,7 @@ void rotateSearch() {
       break;
       
     default: // no check was successful ( b == 0)
+      if (didAttackAtLeastOnce) {
       whiteSensorDrtSaw = analogRead(whiteSensorDrt) >= whiteThreshold;
       whiteSensorStgSaw = analogRead(whiteSensorStg) >= whiteThreshold;
       
@@ -119,14 +122,13 @@ void rotateSearch() {
           powStg = 0;
           powDrt = 0;
           
-        } else if (millis() - backTimer > 250) {
+        } else if (millis() - backTimer > 500) {
           stateTimer = millis();
           powStg = -power;
           powDrt = -power;
         }
       } else {
-        runTime = millis() - stateTimer;
-        backTimer = 0;
+        runTime = (millis() - stateTimer) / 2;
         
         if (whiteSensorDrtSaw == whiteSensorStgSaw) { // == false
           currentState = StateGetOnTrack;
@@ -144,7 +146,16 @@ void rotateSearch() {
           powDrt = power90P;
         }
         stateTimer = millis();
-      }   
+      }
+      } else {
+        
+        if (millis() - backTimer > 400) {
+          currentState = StateGetOnTrack;
+          powStg = power;
+          powDrt = power;
+          stateTimer = millis();
+        }
+      }
       break;
   }
 }
@@ -157,13 +168,15 @@ void rotateFallback() {
     currentState = StateSearch;
     powStg = 0;
     powDrt = 0;
+    didAttackAtLeastOnce = true;
     stateTimer = millis();
-    
+
   } else if (millis() - stateTimer > kTimeWaitFallback) {
     //same as above
     currentState = StateSearch;
     powStg = 0;
     powDrt = 0;
+    didAttackAtLeastOnce = true;
     stateTimer = millis();
   }
 }
@@ -177,6 +190,7 @@ void rotateLoop() {
         powStg = 0;
         powDrt = 0;
         currentState = StateSearch;
+        didAttackAtLeastOnce = true;
         
       } else {
         if (checkForward()) {
@@ -226,12 +240,14 @@ void rotateLoop() {
       
       if (b & 0b00001000) {
         currentState = StateAttack;
+        backTimer = 0;
         rotateAttack();
         stateTimer = millis();
         
       } else if (millis() - stateTimer > runTime) {
         powStg = 0;
         powDrt = 0;
+        backTimer = 0;
         currentState = StateSearch;
       }
       break;

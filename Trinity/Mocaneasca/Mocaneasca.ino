@@ -85,11 +85,11 @@ void attack() {
     }
     if (shouldRotateLeft) {
       powStg = -power;
-      powDrt = power95P;
+      powDrt = power75P;
       
     } else {
       powDrt = -power;
-      powStg = power95P;
+      powStg = power75P;
     }
     currentState = StateRotate;
     timeInState = 100;//random(160, 200);

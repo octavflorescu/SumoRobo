@@ -30,18 +30,25 @@ void attack() {
     if (checkForward()) {
       return;
     }
+
+    if (millis() - stateTimer < 44) {
+      if (b == 0b00011000) {
+        powStg = power90P;
+        powDrt = power;
     
-    if (b == 0b00011000) {
-      powStg = power90P;
-      powDrt = power;
+      } else if (b == 0b00001100) {
+        powDrt = power90P;
+        powStg = power;
     
-    } else if (b == 0b00001100) {
-      powDrt = power90P;
-      powStg = power;
-    
+      } else {
+        powStg = power;
+        powDrt = power;
+      }
     } else {
-      powStg = power;
-      powDrt = power;
+      powStg = 0;
+      powDrt = 0;
+      currentState = StateHalt;
+      stateTimer = millis() + 44;
     }
   }
 }
@@ -59,7 +66,6 @@ void halt() {
   if (millis() - stateTimer > 80) {
     currentState = StateSearch;
     forwardCounts = 0;
-    seeingForwardCounts = 0;
     powStg = 0;
     powDrt = 0;
     stateTimer = millis();
@@ -68,7 +74,8 @@ void halt() {
 
 void search() {
     b = PINB & 0b01111111;
-    
+//    b = PINB & 0b00111110;
+        
     switch (b) {
         case 0:
             seeingForwardCounts = 0;
@@ -158,17 +165,30 @@ void search() {
             break;
             
         case 0b00011100:
-            currentState = StateAttack;
             powStg = power;
             powDrt = power;
-            stateTimer = millis();
+            
+            if (seeingForwardCounts >= kSeeingForwardCounts) {
+                currentState = StateAttack;
+                stateTimer = millis();
+                
+            } else if (millis() - stateTimer > kWaitTime) {
+                currentState = StateForward;
+                seeingForwardCounts++;
+                forwardCounts++;
+                stateTimer = millis();
+                
+            } else {
+                powStg = 0;
+                powDrt = 0;
+            }
             break;
             
         case 0b00001000:
             powStg = power;
             powDrt = power;
             
-            if (seeingForwardCounts  >= kSeeingForwardCounts) {
+            if (seeingForwardCounts >= kSeeingForwardCounts) {
                 currentState = StateAttack;
                 stateTimer = millis();
                 
@@ -208,7 +228,7 @@ void search() {
             powStg = power;
             powDrt = power90P;
             
-            if (seeingForwardCounts  >= kSeeingForwardCounts) {
+            if (seeingForwardCounts >= kSeeingForwardCounts) {
                 currentState = StateAttack;
                 stateTimer = millis();
                 
@@ -223,9 +243,20 @@ void search() {
                 powDrt = 0;
             }
             break;
-            
+
         default: // sees with the mid one
-            break;
+          // error cases
+          currentState = StateFallbackSide;
+          if (b > 0b00000111) {
+            powDrt = power;
+            powStg = -power50P;
+            
+          } else {
+            powDrt = -power50P;
+            powStg = power;
+          }
+          stateTimer = millis();
+        break;
     }
 }
 

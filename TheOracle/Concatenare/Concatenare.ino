@@ -37,8 +37,6 @@ unsigned int putere;
 
 void setup() {
   Serial1.begin(57600);
-//  Serial.begin(9600);
-  WriteMotors(0, 0);
   
   whiteSensorStg = A1;
   whiteSensorDrt = A0;
@@ -50,15 +48,10 @@ void setup() {
   DDRB = 0b00000000;
   pinAsInput(startModule);
   
-  WriteMotors(0, 0);
-  delay(50);
-  WriteMotors(0, 0);
-  delay(50);
+  while (millis() < 2500) {
+    WriteMotors(0, 0);
+  }
 
-//  while (true) {
-//    Serial.println(analogRead(switchPin));
-//  }
-  
   setupStrat();
   setupPowers(putere);
   
@@ -73,6 +66,11 @@ void setup() {
 void loop() {
   looper();
   WriteMotors(powStg, powDrt);
+//  Serial.print(powStg);
+//    Serial.print(" ");
+//    Serial.print(powDrt);
+//    Serial.print("\n");
+//    delay(10000);
 }
 
 void setupStrat() {
@@ -263,17 +261,18 @@ void setupStrat() {
 //      break;
 //    
     default:
-      switch(switchModuleValue % 4) {
-        case 0:
-          looper = &oracleLoop;
-          extraSetup = &oracleExtraSetup;
-          oracleSetup();
-          //
-          directionDrt = (switchModuleValue % 7) % 2 == 0 ? true : false;
-          putere = 255;
-        break;
+      switch(switchModuleValue % 2) {
+//        case 0:
+//          looper = &oracleLoop;
+//          extraSetup = &oracleExtraSetup;
+//          oracleSetup();
+//          //
+//          directionDrt = (switchModuleValue % 7) % 2 == 0 ? true : false;
+//          putere = 255;
+//        break;
 
-        case 1:
+//        case 1:
+        case 0:
           looper = &sacaLoop;
           extraSetup = &sacaExtraSetup;
           sacaSetup();
@@ -282,16 +281,17 @@ void setupStrat() {
           putere = 255;
         break;
 
-        case 2:
-          looper = &rotateLoop;
-          extraSetup = &rotateExtraSetup;
-          rotateSetup();
-          //
-          directionDrt = (switchModuleValue % 7) % 2 == 0 ? true : false;
-          putere = 255;
-        break;
+//        case 2:
+//          looper = &rotateLoop;
+//          extraSetup = &rotateExtraSetup;
+//          rotateSetup();
+//          //
+//          directionDrt = (switchModuleValue % 7) % 2 == 0 ? true : false;
+//          putere = 255;
+//        break;
 
-        case 3:
+//        case 3:
+        case 1:
           looper = &triangleLoop;
           extraSetup = &triangleExtraSetup;
           triangleSetup();
