@@ -1,9 +1,6 @@
 #include "Utils.h"
 #include "Config.h"
 
-#define startModule 12
-#define kHaltTime 10000
-
 int const whiteSensorStgF = A0;
 int const whiteSensorDrtF = A1;
 int const whiteSensorStgS = A2;
@@ -22,4 +19,5 @@ void loop() {
   Serial.write(" ");
   Serial.print(analogRead(whiteSensorDrtS));
   Serial.write("\n");
+  delay(500);
 }

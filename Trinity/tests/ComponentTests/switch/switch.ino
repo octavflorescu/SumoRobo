@@ -1,9 +1,6 @@
 #include "Utils.h"
 #include "Config.h"
 
-#define startModule 12
-#define kHaltTime 10000
-
 int const switchPin = A4;
 
 void setup() {
@@ -13,7 +10,7 @@ void setup() {
 void loop() {
   Serial.print(analogRead(switchPin));
   Serial.write("\n");
-  delay(3000);
+  delay(500);
 }
 
 /*
